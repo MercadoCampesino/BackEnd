@@ -7,7 +7,7 @@ using MercadoCampesinoBack.Modelos;
 namespace BaackMercadoCampesino.Controllers
 {
     [EnableCors("ReglasCors")]          
-    [Route("api/[controller]")]
+    [Route("Tienda")]
     [ApiController]
     public class TiendaController : ControllerBase
     {
@@ -18,7 +18,7 @@ namespace BaackMercadoCampesino.Controllers
 
         }
         [HttpGet]
-        [Route("Lista")]
+        [Route("ListaTienda")]
         public IActionResult Lista()
         {
             List<Tienda> lista = new List<Tienda>();

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Cors;
 namespace BaackMercadoCampesino.Controllers
 {
     [EnableCors("ReglasCors")]
-    [Route("api/[controller]")]
+    [Route("Categoria")]
     [ApiController]
     public class CategoriaController : ControllerBase
     {
