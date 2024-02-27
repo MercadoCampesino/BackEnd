@@ -16,16 +16,24 @@ namespace BaackMercadoCampesino.Controllers
         {
             cadenaSQL = config.GetConnectionString("CadenaSql");
         }
+        //Este es el metodo de peticion para traer los datos
         [HttpGet]
+        //Esta es la ruta de la lista de las categorias ingresadas en el sistema
         [Route("ListaCategoria")]
         public IActionResult lista()
-        {
+        {            
+            //lista generica de Categoria
             List<Categoria> lista = new List<Categoria>();
+            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
             try
             {
+                //Usamos la conexion de la base de datos 
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    //Abrimos la conexion de la base de datos 
                     conexion.Open();
+                    //Creamos una variable por la cual llamamos el procedimiento almacenado de listar categoria que esta almacenado en la base de datos 
+                    //cada que lo requeramos
                     var cmd = new SqlCommand("sp_listarCategoria", conexion);
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     using (var rd = cmd.ExecuteReader())
@@ -39,32 +47,41 @@ namespace BaackMercadoCampesino.Controllers
                             });
                         }
                     }
-
+                    //Retornamos Status200OK si la conexion funciona correctamente
                     return (StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista }));
                 }
             }
             catch (Exception error)
             {
+                //Retornamos Status500InternalServerError si la conexion no funciona correctamente
                 return (StatusCode(StatusCodes.Status400BadRequest, new { mensaje = error.Message }));
             }
         }
+        //Este es el metodo de peticion para traer los datos
         [HttpGet]
+        //Esta es la ruta de obtenr la categoria que desea buscar
         [Route("ObtenerCategoria/{IDCategoria:int}")]
         public IActionResult Obtener (int IDCategoria)
         {
+            //Lista generica de categoria que el resultado que desea traer y onbservar 
             List<Categoria> lista = new List<Categoria>();
             Categoria categoria = new Categoria();
+            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
             try
             {
-                using(var conexion = new SqlConnection(cadenaSQL))
+                //Se crea una variable para usar la conexion de la base de datos cada que le hagamos la petición
+                using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    //Abrimos la conexion de la base de datos 
                     conexion.Open();
+                    //Traemos el procedimiento almacenado corespondiente
                     var cmd = new SqlCommand("sp_listarCategoria", conexion);
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.CommandType = CommandType.StoredProcedure;
                     using (var rd = cmd.ExecuteReader())
                     {
                         while (rd.Read())
                         {
+                            //creamos una nueva conexion, para cada vez que necesitemos los datos reuqeridos, que lo traiga en una lista
                             lista.Add(new Categoria
                             {
                                 IDCategoria = Convert.ToInt32(rd["IDCategoria"]),
@@ -78,10 +95,13 @@ namespace BaackMercadoCampesino.Controllers
             } 
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensage = error.Message });
             }
         }
+        //Este es el metodo de peticion para ingresar datos 
         [HttpPost]
+        //Esta es la ruta de Guardar categoria 
         [Route("GuardarCategoria")]
         public IActionResult Guardar([FromBody] Categoria objeto)
         {
