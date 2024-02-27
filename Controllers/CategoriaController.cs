@@ -33,7 +33,7 @@ namespace BaackMercadoCampesino.Controllers
                     //Abrimos la conexion de la base de datos 
                     conexion.Open();
                     //Creamos una variable por la cual llamamos el procedimiento almacenado de listar categoria que esta almacenado en la base de datos 
-                    //cada que lo requeramos
+                    //cada que lo requerimos
                     var cmd = new SqlCommand("sp_listarCategoria", conexion);
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     using (var rd = cmd.ExecuteReader())
@@ -107,6 +107,7 @@ namespace BaackMercadoCampesino.Controllers
         {
             try
             {
+                //usamos una nueva conexion de la base de datos 
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
                     conexion.Open();
