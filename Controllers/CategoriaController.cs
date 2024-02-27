@@ -110,6 +110,7 @@ namespace BaackMercadoCampesino.Controllers
                 //usamos una nueva conexion de la base de datos 
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    //abrimos la conexion de la base de datos
                     conexion.Open();
                     var cmd = new SqlCommand("sp_agregarCategoria", conexion);
                     cmd.Parameters.AddWithValue("IDCategoria", objeto.IDCategoria);
