@@ -35,7 +35,7 @@ namespace BaackMercadoCampesino.Controllers
                     //Creamos una variable por la cual llamamos el procedimiento almacenado de listar categoria que esta almacenado en la base de datos 
                     //cada que lo requerimos
                     var cmd = new SqlCommand("sp_listarCategoria", conexion);
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.CommandType = CommandType.StoredProcedure;
                     using (var rd = cmd.ExecuteReader())
                     {
                         while (rd.Read())
@@ -113,11 +113,13 @@ namespace BaackMercadoCampesino.Controllers
                     //abrimos la conexion de la base de datos
                     conexion.Open();
                     var cmd = new SqlCommand("sp_agregarCategoria", conexion);
+                    //con la variable de la conexion llamamos los parametros y agregamos por medio de addWhithValue los datos
                     cmd.Parameters.AddWithValue("IDCategoria", objeto.IDCategoria);
                     cmd.Parameters.AddWithValue("tipo", objeto.tipo);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
             }
             catch (Exception error)
@@ -140,6 +142,7 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
             }
             catch (Exception error)
@@ -161,6 +164,7 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
             }
             catch (Exception error)

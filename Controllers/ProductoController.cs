@@ -46,10 +46,12 @@ namespace MercadoCampesinoBack.Controllers
                         }
                     }
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
             }
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
             }
         }
@@ -88,6 +90,7 @@ namespace MercadoCampesinoBack.Controllers
             }
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = producto });
             }
         }
@@ -111,10 +114,12 @@ namespace MercadoCampesinoBack.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
             }
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
@@ -138,10 +143,12 @@ namespace MercadoCampesinoBack.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
             }
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
@@ -159,10 +166,12 @@ namespace MercadoCampesinoBack.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
+                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
             }
             catch (Exception error)
             {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
