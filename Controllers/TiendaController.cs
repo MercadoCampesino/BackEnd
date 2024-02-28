@@ -6,7 +6,6 @@ using MercadoCampesinoBack.Modelos;
 
 namespace BaackMercadoCampesino.Controllers
 {
-    [EnableCors("ReglasCors")]          
     [Route("Tienda")]
     [ApiController]
     public class TiendaController : ControllerBase

@@ -190,5 +190,10 @@ namespace BaackMercadoCampesino.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
+
+       
+
+        }
+
     }
-}
+
