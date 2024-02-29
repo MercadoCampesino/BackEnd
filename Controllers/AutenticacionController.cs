@@ -1,6 +1,8 @@
-﻿using MercadoCampesinoBack.Models;
+﻿using MC_BackEnd.helpers;
+using MercadoCampesinoBack.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,109 +12,48 @@ namespace MercadoCampesinoBack.Controllers
 {
     [Route("Autenticar")]
     [ApiController]
-    public class AutenticacionController : ControllerBase
+    public class AutenticacionController(IConfiguration config) : ControllerBase
     {
-        private readonly string secretKey;
-        private readonly string cadenaSQL;
-
-        public AutenticacionController(IConfiguration config)
-        {
-            secretKey = config.GetSection("settings").GetSection("secretKey").ToString();
-            cadenaSQL = config.GetConnectionString("CadenaSql");
-        }
+        private readonly string secretKey = config.GetSection("settings").GetSection("secretKey").ToString()!;
+        private readonly string cadenaSQL = config.GetConnectionString("CadenaSql")!;
 
         [HttpPost]
         [Route("Cliente")]
         public IActionResult Validar([FromBody] ClienteValidar request)
         {
-            // Verifica si se proporcionaron el correo y la contraseña.
-            if (string.IsNullOrEmpty(request.correo) || string.IsNullOrEmpty(request.contrasenia))
+            string q = $"SELECT * FROM CLIENTE WHERE correo = '{request.correo}' and contrasenia = '{request.contrasenia}'";
+            DataTable dt = Methods.GetTableFromQuery(q, new SqlConnection(cadenaSQL));
+            if (dt.Rows.Count == 0)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, "El correo y la contraseña son obligatorios.");
+                return StatusCode(StatusCodes.Status401Unauthorized, "El correo o la contraseña son incorrectos.");
             }
-
-            // Aquí deberías tener tu lógica de acceso a la base de datos para verificar las credenciales del usuario.
-            // Establezco la variable esValido en true para representar que las credenciales son válidas.
-            bool esValido = false;
-            Cliente cliente;
-            // Realiza la conexión a la base de datos y consulta las credenciales del usuario.
-            using (var connection = new SqlConnection(cadenaSQL))
-            {
-                connection.Open();
-                string sql = "SELECT * FROM Cliente WHERE correo = @correo AND contrasenia = @contrasenia";
-
-                SqlCommand command = new(sql, connection);
-                cliente = Get(request);
-            }
-
-            // Si las credenciales son válidas, genera un token JWT.
-            if (esValido)
-            {
-                var keyBytes = Encoding.ASCII.GetBytes(secretKey);
-                var claims = new ClaimsIdentity();
-                claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, request.correo));
-                claims.AddClaim(new Claim("nombre", cliente.nombre));
-                claims.AddClaim(new Claim("apellido", cliente.apellido));
-                claims.AddClaim(new Claim("telefono", cliente.telefono));
-                claims.AddClaim(new Claim("direccion", cliente.direccion));
-                claims.AddClaim(new Claim("contrasenia", cliente.contrasenia));
-                claims.AddClaim(new Claim("fechaDeNacimiento", cliente.fechaNacimiento));
-                var tokenDescriptor = new SecurityTokenDescriptor
+                Cliente cliente = new()
                 {
-                    Subject = claims,
-                    Expires = DateTime.UtcNow.AddMinutes(5),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+                    correo = dt.Rows[0]["correo"].ToString() ?? "unknown data",
+                    nombre = dt.Rows[0]["nombre"].ToString() ?? "unknown data",
+                    apellido = dt.Rows[0]["apellido"].ToString() ?? "unknown data",
+                    telefono = dt.Rows[0]["telefono"].ToString() ?? "unknown data",
+                    direccion = dt.Rows[0]["direccion"].ToString() ?? "unknown data",
+                    contrasenia = dt.Rows[0]["contrasenia"].ToString() ?? "unknown data",
+                    fechaNacimiento = dt.Rows[0]["fechaDeNacimiento"].ToString() ?? "unknown data"
                 };
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var tokenConfig = tokenHandler.CreateToken(tokenDescriptor);
-                string tokencreado = tokenHandler.WriteToken(tokenConfig);
-                return StatusCode(StatusCodes.Status200OK, new { token = tokencreado });
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized, new { token = "" });
-            }
-        }
+            
 
-        public Cliente Get(ClienteValidar request)
-        {
-
-            string query = "select nombre, apellido, telefono, correo, direccion, contrasenia, fechaDeNacimiento from cliente WHERE correo = @correo AND contrasenia = @contrasenia ";
-            using (SqlConnection connection = new SqlConnection(cadenaSQL))
-            {
-                SqlCommand command = new SqlCommand(query, connection);
-                connection.Open();
-
-                command.Parameters.AddWithValue("correo", request.correo);
-                command.Parameters.AddWithValue("contrasenia", request.contrasenia);
-                SqlDataReader reader = command.ExecuteReader();
-
-                reader.Read();
-                string Nombre = reader.GetString(0);
-                string Apellido = reader.GetString(1);
-                string Telefono = reader.GetString(2);
-                string Correo = reader.GetString(3);
-                string Direccion = reader.GetString(4);
-                string Contrasenia = reader.GetString(5);
-                string FechaDeNacimiento = reader.GetString(6);
-
-                Cliente cliente = new Cliente
-                {
-                    nombre = Nombre,
-                    apellido = Apellido,
-                    telefono = Telefono,
-                    correo = Correo,
-                    direccion = Direccion,
-                    contrasenia = Contrasenia,
-                    fechaNacimiento = FechaDeNacimiento
-                }
-                    ;
-
-
-                connection.Close();
-                return cliente;
-            }
+            // Si las credenciales so
+                var keyBytes = Encoding.ASCII.GetBytes(secretKey);
+                List<Claim> claims = [];
+                claims.Add(new("correo", cliente.correo));
+                claims.Add(new("nombre", cliente.nombre));
+                claims.Add(new("apellido", cliente.apellido));
+                claims.Add(new("telefono", cliente.telefono));
+                claims.Add(new("direccion", cliente.direccion));
+                claims.Add(new("contrasenia", cliente.contrasenia));
+                claims.Add(new("fechaDeNacimiento", cliente.fechaNacimiento));
+                string token = Methods.GenerateToken(claims, secretKey);
+                return StatusCode(StatusCodes.Status200OK, new { token });
 
         }
+
+
     }
 }
