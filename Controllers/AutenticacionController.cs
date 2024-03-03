@@ -1,12 +1,13 @@
 ﻿using MC_BackEnd.helpers;
 using MercadoCampesinoBack.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using MC_BackEnd.Models;
 using System.Data;
 using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using MercadoCampesinoBack.Modelos;
 
 namespace MercadoCampesinoBack.Controllers
 {
@@ -49,6 +50,42 @@ namespace MercadoCampesinoBack.Controllers
                 claims.Add(new("direccion", cliente.direccion));
                 claims.Add(new("contrasenia", cliente.contrasenia));
                 claims.Add(new("fechaDeNacimiento", cliente.fechaNacimiento));
+                string token = Methods.GenerateToken(claims, secretKey);
+                return StatusCode(StatusCodes.Status200OK, new { token });
+
+        }
+
+        [HttpPost]
+        [Route("Tienda")]
+        public IActionResult Validar([FromBody] TiendaValidar request)
+        {
+            string q = $"SELECT * FROM TIENDA WHERE correo = '{request.correo}' and contrasenia = '{request.contrasenia}'";
+            DataTable dt = Methods.GetTableFromQuery(q, new SqlConnection(cadenaSQL));
+            if (dt.Rows.Count == 0)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, "El correo o la contraseña son incorrectos.");
+            }
+            Tienda tienda = new()
+                {
+                    IDTienda = Convert.ToInt32(dt.Rows[0]["idTienda"]),
+                    imagen = dt.Rows[0]["imagen"].ToString() ?? "defaultImage",
+                    correo = dt.Rows[0]["correo"].ToString() ?? "unknown data",
+                    nombre = dt.Rows[0]["nombre"].ToString() ?? "unknown data",
+                    telefono = dt.Rows[0]["telefono"].ToString() ?? "unknown data",
+                    direccion = dt.Rows[0]["direccion"].ToString() ?? "unknown data",
+                    contrasenia = dt.Rows[0]["contrasenia"].ToString() ?? "unknown data",
+                    FK_IDAdministrador = Convert.ToInt32(dt.Rows[0]["fK_IDAdministrador"])
+                    
+                };
+
+            // Si las credenciales so
+            var keyBytes = Encoding.ASCII.GetBytes(secretKey);
+                List<Claim> claims = [];
+                claims.Add(new("correo", tienda.correo));
+                claims.Add(new("nombre", tienda.nombre));
+                claims.Add(new("telefono", tienda.telefono));
+                claims.Add(new("direccion", tienda.direccion));
+                claims.Add(new("contrasenia", tienda.contrasenia));
                 string token = Methods.GenerateToken(claims, secretKey);
                 return StatusCode(StatusCodes.Status200OK, new { token });
 
