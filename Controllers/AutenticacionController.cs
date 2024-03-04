@@ -82,6 +82,7 @@ namespace MercadoCampesinoBack.Controllers
             var keyBytes = Encoding.ASCII.GetBytes(secretKey);
                 List<Claim> claims = [];
                 claims.Add(new("correo", tienda.correo));
+                claims.Add(new("idTienda", tienda.IDTienda));
                 claims.Add(new("nombre", tienda.nombre));
                 claims.Add(new("telefono", tienda.telefono));
                 claims.Add(new("direccion", tienda.direccion));
