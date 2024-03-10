@@ -98,11 +98,9 @@ namespace MercadoCampesinoBack.Controllers
         [Route("GuardarProducto")]
         public IActionResult Guardar([FromBody] Producto objeto)
         {
-            try
-            {
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
+            var conexion = new SqlConnection(cadenaSQL);
                     conexion.Open();
+            try {
                     var cmd = new SqlCommand("sp_agregarProducto", conexion);
                     cmd.Parameters.AddWithValue("IDProducto", objeto.IDProducto);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre);
@@ -113,25 +111,25 @@ namespace MercadoCampesinoBack.Controllers
                     cmd.Parameters.AddWithValue("FK_IDCategoria", objeto.FK_IDCategoria);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
-                }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
             }
             catch (Exception error)
             {
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
-            }
+            } finally
+            {
+                conexion.Close();
+            }   
         }
         [HttpPut]
         [Route("EditarProducto")]
         public IActionResult Editar([FromBody] Producto objeto)
         {
+            var conexion = new SqlConnection(cadenaSQL);
+            conexion.Open();
             try
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
-                    conexion.Open();
                     var cmd = new SqlCommand("sp_editarProducto", conexion);
                     cmd.Parameters.AddWithValue("IDProducto", objeto.IDProducto == 0 ? DBNull.Value : objeto.IDProducto);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre is null ? DBNull.Value : objeto.nombre);
@@ -142,14 +140,15 @@ namespace MercadoCampesinoBack.Controllers
                     cmd.Parameters.AddWithValue("FK_IDCategoria", objeto.FK_IDCategoria == 0 ? DBNull.Value : objeto.FK_IDCategoria);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
-                }
-                //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
             }
             catch (Exception error)
             {
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+            } finally
+            {
+                conexion.Close();
             }
         }
         [HttpDelete]
