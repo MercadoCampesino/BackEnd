@@ -40,6 +40,7 @@ namespace BaackMercadoCampesino.Controllers
                             {
                                 IDCliente = Convert.ToInt32(rd["IDCliente"]),
                                 nombre = rd["nombre"].ToString(),
+                                imagen = rd["imagen"].ToString(),
                                 apellido = rd["apellido"].ToString(),
                                 telefono = rd["telefono"].ToString(),
                                 correo = rd["correo"].ToString(),
@@ -82,6 +83,7 @@ namespace BaackMercadoCampesino.Controllers
                             {
                                 IDCliente = Convert.ToInt32(rd["IDCliente"]),
                                 nombre = rd["nombre"].ToString(),
+                                imagen = rd["imagen"].ToString(),
                                 apellido = rd["apellido"].ToString(),
                                 fechaNacimiento = (string)rd["fechaDeNacimiento"],
                                 telefono = rd["telefono"].ToString(),
@@ -116,6 +118,7 @@ namespace BaackMercadoCampesino.Controllers
                     var cmd = new SqlCommand("sp_agregarCliente", conexion);
                     cmd.Parameters.AddWithValue("IDCliente", objeto.IDCliente);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre);
+                    cmd.Parameters.AddWithValue("imagen", objeto.imagen);
                     cmd.Parameters.AddWithValue("apellido", objeto.apellido);
                     cmd.Parameters.AddWithValue("fechaDeNacimiento", objeto.fechaNacimiento);
                     cmd.Parameters.AddWithValue("telefono", objeto.telefono);
@@ -149,6 +152,7 @@ namespace BaackMercadoCampesino.Controllers
                     var cmd = new SqlCommand("sp_editarCliente", conexion);
                     cmd.Parameters.AddWithValue("IDCliente", objeto.IDCliente ==  0 ? DBNull.Value : objeto.IDCliente);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre is null ? DBNull.Value : objeto.nombre);
+                    cmd.Parameters.AddWithValue("imagen", objeto.imagen is null ? DBNull.Value : objeto.imagen);
                     cmd.Parameters.AddWithValue("apellido", objeto.apellido is null ? DBNull.Value : objeto.apellido);
                     cmd.Parameters.AddWithValue("fechaDeNacimiento", objeto.fechaNacimiento == default ? DBNull.Value : objeto.fechaNacimiento);
                     cmd.Parameters.AddWithValue("telefono", objeto.telefono is null ? DBNull.Value : objeto.telefono);
