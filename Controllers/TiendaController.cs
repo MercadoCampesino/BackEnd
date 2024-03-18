@@ -99,13 +99,11 @@ namespace BaackMercadoCampesino.Controllers
         [Route("GuardarTienda")]
         public IActionResult Guardar([FromBody] Tienda objeto)
         {
-            string contraseniaHash = BCrypt.Net.BCrypt.HashPassword(objeto.contrasenia);
             try
             {
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
                     conexion.Open();
-                    objeto.contrasenia = contraseniaHash;
                     var cmd = new SqlCommand("sp_agregarTienda", conexion);
                     cmd.Parameters.AddWithValue("IDTienda", objeto.IDTienda);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre);
