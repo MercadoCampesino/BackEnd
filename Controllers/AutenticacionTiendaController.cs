@@ -56,6 +56,7 @@ namespace MC_BackEnd.Controllers
                 var claims = new ClaimsIdentity();
                 claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, request.correo));
                 claims.AddClaim(new Claim("nombre", tienda.nombre));
+                claims.AddClaim(new Claim("imagen", tienda.imagen));
                 claims.AddClaim(new Claim("telefono", tienda.telefono));
                 claims.AddClaim(new Claim("direccion", tienda.direccion));
                 claims.AddClaim(new Claim("contrasenia", tienda.contrasenia));

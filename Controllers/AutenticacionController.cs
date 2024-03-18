@@ -32,6 +32,7 @@ namespace MercadoCampesinoBack.Controllers
                 {
                     correo = dt.Rows[0]["correo"].ToString() ?? "unknown data",
                     nombre = dt.Rows[0]["nombre"].ToString() ?? "unknown data",
+                    imagen = dt.Rows[0]["imagen"].ToString() ?? "unknown data",
                     apellido = dt.Rows[0]["apellido"].ToString() ?? "unknown data",
                     telefono = dt.Rows[0]["telefono"].ToString() ?? "unknown data",
                     direccion = dt.Rows[0]["direccion"].ToString() ?? "unknown data",
@@ -45,6 +46,7 @@ namespace MercadoCampesinoBack.Controllers
                 List<Claim> claims = [];
                 claims.Add(new("correo", cliente.correo));
                 claims.Add(new("nombre", cliente.nombre));
+                claims.Add(new("imagen", cliente.imagen));
                 claims.Add(new("apellido", cliente.apellido));
                 claims.Add(new("telefono", cliente.telefono));
                 claims.Add(new("direccion", cliente.direccion));
@@ -82,6 +84,7 @@ namespace MercadoCampesinoBack.Controllers
             var keyBytes = Encoding.ASCII.GetBytes(secretKey);
                 List<Claim> claims = [];
                 claims.Add(new("correo", tienda.correo));
+                claims.Add(new("imagen", tienda.imagen));
                 claims.Add(new("idTienda", tienda.IDTienda.ToString()));
                 claims.Add(new("nombre", tienda.nombre));
                 claims.Add(new("telefono", tienda.telefono));
