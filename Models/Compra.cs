@@ -2,7 +2,7 @@
 {
     public class Compra
     {
-        public int FK_IDTienda { get; set; }
+        public int FK_IDProducto { get; set; }
         public int FK_IDCliente { get; set; }
     
     }

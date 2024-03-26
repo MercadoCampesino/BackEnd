@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
 using MC_BackEnd.Models;
+using MercadoCampesinoBack.Models;
 
 namespace MC_BackEnd.Controllers
 {
@@ -12,94 +13,11 @@ namespace MC_BackEnd.Controllers
     public class CompraController : ControllerBase
     {
         private readonly string cadenaSQL;
+
         public CompraController(IConfiguration config)
         {
             cadenaSQL = config.GetConnectionString("CadenaSql");
         }
-        //Este es el metodo de peticion para traer los datos
-        [HttpGet]
-        //Esta es la ruta de la lista de las compra ingresadas en el sistema
-        [Route("ListaCompra")]
-        public IActionResult lista()
-        {
-            //lista generica de Categoria
-            List<Compra> lista = new List<Compra>();
-            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
-            try
-            {
-                //Usamos la conexion de la base de datos 
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
-                    //Abrimos la conexion de la base de datos 
-                    conexion.Open();
-                    //Creamos una variable por la cual llamamos el procedimiento almacenado de listar compra que esta almacenado en la base de datos 
-                    //cada que lo requerimos
-                    var cmd = new SqlCommand("sp_listarCompra", conexion);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    using (var rd = cmd.ExecuteReader())
-                    {
-                        while (rd.Read())
-                        {
-                            lista.Add(new Compra
-                            {
-                                FK_IDTienda = Convert.ToInt32(rd["FK_IDTienda"]),
-                                FK_IDCliente = Convert.ToInt32(rd["FK_IDCliente"]),
-                            });
-                        }
-                    }
-                    //Retornamos Status200OK si la conexion funciona correctamente
-                    return (StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista }));
-                }
-            }
-            catch (Exception error)
-            {
-                //Retornamos Status500InternalServerError si la conexion no funciona correctamente
-                return (StatusCode(StatusCodes.Status400BadRequest, new { mensaje = error.Message }));
-            }
-        }
-        //Este es el metodo de peticion para traer los datos
-        [HttpGet]
-        //Esta es la ruta de obtenr la categoria que desea buscar
-        [Route("ObtenerCompra/{FK_IDCliente:int}/{FK_IDTienda:int}")]
-        public IActionResult Obtener(int FK_IDCliente, int FK_IDTienda)
-        {
-            //Lista generica de categoria que el resultado que desea traer y observar 
-            List<Compra> lista = new List<Compra>();
-            Compra compra = new Compra();
-            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
-            try
-            {
-                //Se crea una variable para usar la conexion de la base de datos cada que le hagamos la petición
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
-                    //Abrimos la conexion de la base de datos 
-                    conexion.Open();
-                    //Traemos el procedimiento almacenado corespondiente
-                    var cmd = new SqlCommand("sp_listarCompra", conexion);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    using (var rd = cmd.ExecuteReader())
-                    {
-                        while (rd.Read())
-                        {
-                            //creamos una nueva conexion, para cada vez que necesitemos los datos reuqeridos, que lo traiga en una lista
-                            lista.Add(new Compra
-                            {
-                                FK_IDTienda = Convert.ToInt32(rd["FK_IDTienda"]),
-                                FK_IDCliente = Convert.ToInt32(rd["FK_IDCliente"]),
-                            });
-                        }
-                    }
-                }
-                compra = lista.Where(item => item.FK_IDCliente == FK_IDCliente && item.FK_IDTienda == FK_IDTienda).FirstOrDefault();
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = compra });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensage = error.Message });
-            }
-        }
-        //Este es el metodo de peticion para ingresar datos 
         [HttpPost]
         //Esta es la ruta de Guardar categoria 
         [Route("GuardarCompra")]
@@ -114,7 +32,7 @@ namespace MC_BackEnd.Controllers
                     conexion.Open();
                     var cmd = new SqlCommand("sp_agregarCompra", conexion);
                     //con la variable de la conexion llamamos los parametros y agregamos por medio de addWhithValue los datos
-                    cmd.Parameters.AddWithValue("FK_IDTienda", objeto.FK_IDTienda);
+                    cmd.Parameters.AddWithValue("FK_IDProducto", objeto.FK_IDProducto);
                     cmd.Parameters.AddWithValue("FK_IDCliente", objeto.FK_IDCliente);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
@@ -127,27 +45,173 @@ namespace MC_BackEnd.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
-        [HttpDelete]
-        [Route("EliminarCompra/{FK_IDCliente:int}/{FK_IDTienda:int}")]
-        public IActionResult Eliminar(int FK_IDTienda, int FK_IDCliente)
+        [HttpGet]
+        [Route("ObtenerCompra/{FK_IDCliente:int}/{FK_IDProducto:int}")]
+        public IActionResult ObtenerCompra(int FK_IDCliente, int FK_IDProducto)
         {
             try
             {
+                Cliente cliente = null;
+                Producto producto = null;
+                Compra compra = null;
+
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
                     conexion.Open();
-                    var cmd = new SqlCommand("sp_eliminarCompra", conexion);
-                    cmd.Parameters.AddWithValue("FK_IDTienda", FK_IDTienda);
-                    cmd.Parameters.AddWithValue("FK_IDCliente", FK_IDCliente);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
+
+                    // Obtener información del cliente
+                    var cmdCliente = new SqlCommand("SELECT * FROM Cliente WHERE IDCliente = @IDCliente", conexion);
+                    cmdCliente.Parameters.AddWithValue("@IDCliente", FK_IDCliente);
+                    using (var readerCliente = cmdCliente.ExecuteReader())
+                    {
+                        if (readerCliente.Read())
+                        {
+                            cliente = new Cliente
+                            {
+                                IDCliente = Convert.ToInt32(readerCliente["IDCliente"]),
+                                nombre = Convert.ToString(readerCliente["Nombre"]),
+                                apellido = Convert.ToString(readerCliente["apellido"]),
+                                telefono = Convert.ToString(readerCliente["telefono"]),
+                                correo = Convert.ToString(readerCliente["correo"]),
+                                direccion = Convert.ToString(readerCliente["direccion"]),
+                                // Añadir más propiedades según la estructura de tu tabla Cliente
+                            };
+                        }
+                    }
+
+                    // Obtener información del producto
+                    var cmdProducto = new SqlCommand("SELECT * FROM Producto WHERE IDProducto = @IDProducto", conexion);
+                    cmdProducto.Parameters.AddWithValue("@IDProducto", FK_IDProducto);
+                    using (var readerProducto = cmdProducto.ExecuteReader())
+                    {
+                        if (readerProducto.Read())
+                        {
+                            producto = new Producto
+                            {
+                                IDProducto = Convert.ToInt32(readerProducto["IDProducto"]),
+                                nombre = Convert.ToString(readerProducto["Nombre"]),
+                                existencia = Convert.ToInt32(readerProducto["existencia"]),
+                                precio = Convert.ToInt32(readerProducto["precio"]),
+                                imagen = Convert.ToString(readerProducto["imagen"]),
+                                FK_IDCategoria = Convert.ToInt32(readerProducto["FK_IDCategoria"]),
+                                FK_IDTienda = Convert.ToInt32(readerProducto["FK_IDTienda"]),
+                                // Añadir más propiedades según la estructura de tu tabla producto
+                            };
+                        }
+                    }
+
+                    // Obtener información de la compra
+                    var cmdCompra = new SqlCommand("sp_listarCompra", conexion);
+                    cmdCompra.CommandType = CommandType.StoredProcedure;
+                    using (var rd = cmdCompra.ExecuteReader())
+                    {
+                        while (rd.Read())
+                        {
+                            var compraActual = new Compra
+                            {
+                                FK_IDProducto = Convert.ToInt32(rd["FK_IDProducto"]),
+                                FK_IDCliente = Convert.ToInt32(rd["FK_IDCliente"])
+                            };
+
+                            if (compraActual.FK_IDCliente == FK_IDCliente && compraActual.FK_IDProducto == FK_IDProducto)
+                            {
+                                compra = compraActual;
+                                break;
+                            }
+                        }
+                    }
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
+
+                if (cliente != null && producto != null && compra != null)
+                    return Ok(new { mensaje = "ok", Cliente = cliente, Tienda = producto, Compra = compra });
+                else
+                    return NotFound();
             }
             catch (Exception error)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                return StatusCode(500, new { mensaje = error.Message });
+            }
+        }
+        [HttpGet]
+        [Route("ListarCompra")]
+        public IActionResult ListarCompra()
+        {
+            try
+            {
+                Cliente cliente = null;
+                Producto producto = null;
+                List<Compra> compras = new List<Compra>(); // Lista de compras
+
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
+                    conexion.Open();
+
+                    // Obtener información del cliente
+                    var cmdCliente = new SqlCommand("sp_listarCliente", conexion);
+                    using (var readerCliente = cmdCliente.ExecuteReader())
+                    {
+                        if (readerCliente.Read())
+                        {
+                            cliente = new Cliente
+                            {
+                                IDCliente = Convert.ToInt32(readerCliente["IDCliente"]),
+                                nombre = Convert.ToString(readerCliente["Nombre"]),
+                                apellido = Convert.ToString(readerCliente["apellido"]), // Corregir aquí
+                                telefono = Convert.ToString(readerCliente["telefono"]),
+                                correo = Convert.ToString(readerCliente["correo"]),
+                                direccion = Convert.ToString(readerCliente["direccion"]),
+                                // Añadir más propiedades según la estructura de tu tabla Cliente
+                            };
+                        }
+                    }
+
+                    // Obtener información del producto
+                    var cmdProducto = new SqlCommand("sp_listarProductos", conexion);
+                    using (var readerProducto = cmdProducto.ExecuteReader())
+                    {
+                        if (readerProducto.Read())
+                        {
+                            producto = new Producto
+                            {
+                                IDProducto = Convert.ToInt32(readerProducto["IDProducto"]),
+                                nombre = Convert.ToString(readerProducto["Nombre"]),
+                                existencia = Convert.ToInt32(readerProducto["existencia"]),
+                                precio = Convert.ToInt32(readerProducto["precio"]),
+                                imagen = Convert.ToString(readerProducto["imagen"]),
+                                FK_IDCategoria = Convert.ToInt32(readerProducto["FK_IDCategoria"]),
+                                FK_IDTienda = Convert.ToInt32(readerProducto["FK_IDTienda"]),
+                                // Añadir más propiedades según la estructura de tu tabla producto
+                            };
+                        }
+                    }
+
+                    // Obtener información de la compra
+                    var cmdCompra = new SqlCommand("sp_listarCompra", conexion);
+                    cmdCompra.CommandType = CommandType.StoredProcedure;
+                    using (var rd = cmdCompra.ExecuteReader())
+                    {
+                        while (rd.Read())
+                        {
+                            var compraActual = new Compra
+                            {
+                                FK_IDProducto = Convert.ToInt32(rd["FK_IDProducto"]),
+                                FK_IDCliente = Convert.ToInt32(rd["FK_IDCliente"])
+                            };
+
+                            compras.Add(compraActual); // Agregar la compra actual a la lista de compras
+                        }
+                    }
+                }
+
+                // Verificar si se encontraron cliente, producto y compras
+                if (cliente != null && producto != null && compras.Count > 0)
+                    return Ok(new { mensaje = "ok", Cliente = cliente, Producto = producto, Compras = compras });
+                else
+                    return NotFound();
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500, new { mensaje = error.Message });
             }
         }
     }
