@@ -130,16 +130,13 @@ namespace MercadoCampesinoBack.Controllers
             conexion.Open();
             try
             {
-                    var cmd = new SqlCommand("sp_editarProducto", conexion);
-                    cmd.Parameters.AddWithValue("IDProducto", objeto.IDProducto == 0 ? DBNull.Value : objeto.IDProducto);
-                    cmd.Parameters.AddWithValue("nombre", objeto.nombre is null ? DBNull.Value : objeto.nombre);
-                    cmd.Parameters.AddWithValue("existencia", objeto.existencia ==0 ? DBNull.Value : objeto.existencia);
-                    cmd.Parameters.AddWithValue("precio", objeto.precio == 0 ? DBNull.Value : objeto.precio);
-                    cmd.Parameters.AddWithValue("imagen", objeto.imagen is null ? DBNull.Value : objeto.imagen);
-                    cmd.Parameters.AddWithValue("FK_IDTienda", objeto.FK_IDTienda == 0 ? DBNull.Value : objeto.FK_IDTienda);
-                    cmd.Parameters.AddWithValue("FK_IDCategoria", objeto.FK_IDCategoria == 0 ? DBNull.Value : objeto.FK_IDCategoria);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
+                conexion.Open();
+                var cmd = new SqlCommand("sp_editarProducto1", conexion);
+                cmd.Parameters.AddWithValue("IDProducto", objeto.IDProducto == 0 ? DBNull.Value : objeto.IDProducto);
+                cmd.Parameters.AddWithValue("existencia", objeto.existencia == 0 ? DBNull.Value : objeto.existencia);
+                cmd.Parameters.AddWithValue("precio", objeto.precio == 0 ? DBNull.Value : objeto.precio);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.ExecuteNonQuery();
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
             }
             catch (Exception error)
