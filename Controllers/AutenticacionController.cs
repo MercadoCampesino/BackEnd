@@ -30,7 +30,7 @@ namespace MercadoCampesinoBack.Controllers
             }
                 Cliente cliente = new()
                 {
-                    IDCliente = int.Parse(dt.Rows[0]["IDCliente"].ToString() ?? "unknown data"),
+                    IDCliente = int.Parse(dt.Rows[0]["IDCliente"].ToString() ?? "0"),
                     correo = dt.Rows[0]["correo"].ToString() ?? "unknown data",
                     nombre = dt.Rows[0]["nombre"].ToString() ?? "unknown data",
                     imagen = dt.Rows[0]["imagen"].ToString() ?? "unknown data",
