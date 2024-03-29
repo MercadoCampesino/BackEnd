@@ -30,6 +30,7 @@ namespace MercadoCampesinoBack.Controllers
             }
                 Cliente cliente = new()
                 {
+                    IDCliente = int.Parse(dt.Rows[0]["IDCliente"].ToString() ?? "unknown data"),
                     correo = dt.Rows[0]["correo"].ToString() ?? "unknown data",
                     nombre = dt.Rows[0]["nombre"].ToString() ?? "unknown data",
                     imagen = dt.Rows[0]["imagen"].ToString() ?? "unknown data",
@@ -44,6 +45,7 @@ namespace MercadoCampesinoBack.Controllers
             // Si las credenciales so
                 var keyBytes = Encoding.ASCII.GetBytes(secretKey);
                 List<Claim> claims = [];
+                claims.Add(new("IDCliente", cliente.IDCliente));
                 claims.Add(new("correo", cliente.correo));
                 claims.Add(new("nombre", cliente.nombre));
                 claims.Add(new("imagen", cliente.imagen));
