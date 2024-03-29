@@ -214,5 +214,58 @@ namespace MC_BackEnd.Controllers
                 return StatusCode(500, new { mensaje = error.Message });
             }
         }
+
+        [HttpGet]
+        [Route("ListarPorCliente")]
+        public IActionResult ListarPorCliente([FromQuery] int IdCliente)
+        {
+            /*
+             CREATE PROCEDURE sp_ListarProductosComprados
+            @idCliente INT
+            AS
+            BEGIN
+                SELECT P.existencia, P.imagen, P.nombre, P.precio, P.FK_IDCategoria, P.FK_IDCategoria
+                FROM producto P  INNER JOIN compra C ON P.IDProducto = C.FK_IDProducto
+                WHERE C.FK_IDCliente = @idCliente
+            END;
+             */
+
+            string q= "sp_ListarProductosComprados";
+            try
+            {
+                List<Producto> productos = new List<Producto>();
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
+                    conexion.Open();
+                    SqlCommand cmd = new(q, conexion)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    cmd.Parameters.AddWithValue("@idCliente", IdCliente);
+                    using (var rd = cmd.ExecuteReader())
+                    {
+                        while (rd.Read())
+                        {
+                            var producto = new Producto
+                            {
+                                existencia = Convert.ToInt32(rd["existencia"]),
+                                imagen = Convert.ToString(rd["imagen"]),
+                                nombre = Convert.ToString(rd["nombre"]),
+                                precio = Convert.ToInt32(rd["precio"]),
+                                FK_IDCategoria = Convert.ToInt32(rd["FK_IDCategoria"]),
+                                FK_IDTienda = Convert.ToInt32(rd["FK_IDTienda"])
+                            };
+                            productos.Add(producto);
+                        }
+                    }
+                }
+                return Ok(new { mensaje = "ok", Productos = productos });
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500, new { mensaje = error.Message });
+            }
+
+        }
     }
 }
