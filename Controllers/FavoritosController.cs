@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
 using MercadoCampesinoBack.Models;
+using Microsoft.Extensions.Primitives;
+using MC_BackEnd.helpers;
 
 namespace MC_BackEnd.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("Favoritos")]
     [ApiController]
     public class FavoritosController : ControllerBase
     {
@@ -46,6 +48,43 @@ namespace MC_BackEnd.Controllers
             catch (Exception error)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
+            }
+        }
+
+        [HttpGet]
+        [Route("ListarFavoritosPorPersona")]
+        public IActionResult ListaPorPersona([FromQuery] int FK_IDCliente1)
+        {
+            string query = $"EXECUTE ObtenerProductosFavoritos {FK_IDCliente1}";
+            /*
+               SELECT p.Nombre, p.Precio, p.Imagen
+  FROM Favoritos f
+  INNER JOIN Producto p ON f.FK_IDProducto1 = p.IDProducto
+  WHERE f.FK_IDCliente1 = ClienteID;
+             */
+            try
+            {
+
+                DataTable dt = Methods.GetTableFromQuery(query, new SqlConnection(cadenaSQL));
+                List<Producto> favoritos = [];
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    favoritos.Add(new Producto
+                    {
+                        IDProducto = Convert.ToInt32(dt.Rows[i]["IDProducto"]),
+                        nombre = dt.Rows[i]["nombre"].ToString() ?? "unknown",
+                        existencia = Convert.ToInt32(dt.Rows[i]["existencia"]),
+                        precio = Convert.ToInt32(dt.Rows[i]["precio"]),
+                        imagen = dt.Rows[i]["imagen"].ToString() ?? "unknown",
+                        FK_IDTienda = Convert.ToInt32(dt.Rows[i]["FK_IDTienda"]),
+                        FK_IDCategoria = Convert.ToInt32(dt.Rows[i]["FK_IDCategoria"])
+                    });
+                }
+                
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = favoritos });
+            } catch (Exception error)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
 
