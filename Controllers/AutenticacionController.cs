@@ -45,7 +45,7 @@ namespace MercadoCampesinoBack.Controllers
             // Si las credenciales so
                 var keyBytes = Encoding.ASCII.GetBytes(secretKey);
                 List<Claim> claims = [];
-                claims.Add(new("IDCliente", cliente.IDCliente));
+                claims.Add(new("IDCliente", cliente.IDCliente.ToString()));
                 claims.Add(new("correo", cliente.correo));
                 claims.Add(new("nombre", cliente.nombre));
                 claims.Add(new("imagen", cliente.imagen));
