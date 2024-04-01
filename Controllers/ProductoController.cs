@@ -66,7 +66,7 @@ namespace MercadoCampesinoBack.Controllers
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
                     conexion.Open();
-                    var cmd = new SqlCommand("sp_listar_productos", conexion);
+                    var cmd = new SqlCommand("sp_listarProductos", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     using (var rd = cmd.ExecuteReader())
                     {
