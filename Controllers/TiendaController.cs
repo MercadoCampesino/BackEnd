@@ -56,7 +56,7 @@ namespace BaackMercadoCampesino.Controllers
             }
         }
         [HttpGet]
-        [Route("ObtenerTienda/{IDCliente:int}")]
+        [Route("ObtenerTienda/{IDTienda:int}")]
         public IActionResult Obtener(int IDTienda)
         {
             List<Tienda> lista = new List<Tienda>();
