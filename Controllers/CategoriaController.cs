@@ -24,12 +24,13 @@ namespace BaackMercadoCampesino.Controllers
         {            
             //lista generica de Categoria
             List<Categoria> lista = new List<Categoria>();
-            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
-            try
+            //Usamos la conexion de la base de datos 
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                //Usamos la conexion de la base de datos 
-                using (var conexion = new SqlConnection(cadenaSQL))
+                //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
+                try
                 {
+
                     //Abrimos la conexion de la base de datos 
                     conexion.Open();
                     //Creamos una variable por la cual llamamos el procedimiento almacenado de listar categoria que esta almacenado en la base de datos 
@@ -49,29 +50,35 @@ namespace BaackMercadoCampesino.Controllers
                     }
                     //Retornamos Status200OK si la conexion funciona correctamente
                     return (StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista }));
+
                 }
-            }
-            catch (Exception error)
-            {
-                //Retornamos Status500InternalServerError si la conexion no funciona correctamente
-                return (StatusCode(StatusCodes.Status400BadRequest, new { mensaje = error.Message }));
+                catch (Exception error)
+                {
+                    //Retornamos Status500InternalServerError si la conexion no funciona correctamente
+                    return (StatusCode(StatusCodes.Status400BadRequest, new { mensaje = error.Message }));
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
         //Este es el metodo de peticion para traer los datos
         [HttpGet]
         //Esta es la ruta de obtenr la categoria que desea buscar
         [Route("ObtenerCategoria/{IDCategoria:int}")]
-        public IActionResult Obtener (int IDCategoria)
+        public IActionResult Obtener(int IDCategoria)
         {
             //Lista generica de categoria que el resultado que desea traer y onbservar 
             List<Categoria> lista = new List<Categoria>();
             Categoria categoria = new Categoria();
-            //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
-            try
+            //Se crea una variable para usar la conexion de la base de datos cada que le hagamos la petición
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                //Se crea una variable para usar la conexion de la base de datos cada que le hagamos la petición
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
+                //Hacemos un try catch para verificar que la conexion a la base de datos es correcta o no
+                try
+            {
+                
                     //Abrimos la conexion de la base de datos 
                     conexion.Open();
                     //Traemos el procedimiento almacenado corespondiente
@@ -85,18 +92,23 @@ namespace BaackMercadoCampesino.Controllers
                             lista.Add(new Categoria
                             {
                                 IDCategoria = Convert.ToInt32(rd["IDCategoria"]),
-                                tipo= rd["tipo"].ToString()
+                                tipo = rd["tipo"].ToString()
                             });
                         }
-                    }
+                    
                 }
                 categoria = lista.Where(item => item.IDCategoria == IDCategoria).FirstOrDefault();
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = categoria });
-            } 
+            }
             catch (Exception error)
             {
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensage = error.Message });
+            }
+            finally
+            {
+                conexion.Close();
+            }
             }
         }
         //Este es el metodo de peticion para ingresar datos 
@@ -154,22 +166,28 @@ namespace BaackMercadoCampesino.Controllers
         [Route("EliminarCategoria/{IDCategoria:int}")]
         public IActionResult Eliminar(int IDCategoria)
         {
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+
                     conexion.Open();
                     var cmd = new SqlCommand("sp_eliminarCategoria", conexion);
                     cmd.Parameters.AddWithValue("IDCategoria", IDCategoria);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
-            }
-            catch (Exception error)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                catch (Exception error)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
     }

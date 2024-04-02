@@ -24,11 +24,12 @@ namespace BaackMercadoCampesino.Controllers
         [Route("ListaCliente")]
         public IActionResult Lista()
         {
-            List<Cliente> lista = new List<Cliente>();
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
+                List<Cliente> lista = new List<Cliente>();
+                try
                 {
+
                     conexion.Open();
                     var cmd = new SqlCommand("sp_listarCliente", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -47,31 +48,38 @@ namespace BaackMercadoCampesino.Controllers
                                 direccion = rd["direccion"].ToString(),
                                 contrasenia = rd["contrasenia"].ToString(),
                                 fechaNacimiento = rd["fechaDeNacimiento"].ToString(),
-                                FK_IDAdministrador = Convert.ToInt32(rd["FK_IDAdministrador"]) 
+                                FK_IDAdministrador = Convert.ToInt32(rd["FK_IDAdministrador"])
 
                             });
                         }
                     }
+
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
         [HttpGet]
         [Route("ObtenerCliente/{IDCliente:int}")]
         public IActionResult Obtener(int IDCliente)
         {
+
             List<Cliente> lista = new List<Cliente>();
             Cliente cliente = new Cliente();
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+
                     conexion.Open();
                     var cmd = new SqlCommand("sp_listaCliente", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -94,14 +102,19 @@ namespace BaackMercadoCampesino.Controllers
                             });
                         }
                     }
+
+                    cliente = lista.Where(item => item.IDCliente == IDCliente).FirstOrDefault();
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = cliente });
                 }
-                cliente = lista.Where(item => item.IDCliente == IDCliente).FirstOrDefault();
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = cliente });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = cliente });
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = cliente });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
         [HttpPost]
@@ -109,10 +122,11 @@ namespace BaackMercadoCampesino.Controllers
         public IActionResult Guardar([FromBody] Cliente objeto)
         {
             string contraseniaHash = objeto.contrasenia;//BCrypt.Net.BCrypt.HashPassword(objeto.contrasenia);
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+
                     conexion.Open();
                     objeto.contrasenia = contraseniaHash;
                     var cmd = new SqlCommand("sp_agregarCliente", conexion);
@@ -128,29 +142,34 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("FK_IDAdministrador", objeto.FK_IDAdministrador = 1094880982);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
         [HttpPut]
         [Route("EditarCliente")]
         public IActionResult Editar([FromBody] Cliente objeto)
         {
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                string contraseniaHash = BCrypt.Net.BCrypt.HashPassword(objeto.contrasenia);
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+                    string contraseniaHash = BCrypt.Net.BCrypt.HashPassword(objeto.contrasenia);
+
                     conexion.Open();
                     objeto.contrasenia = contraseniaHash;
                     var cmd = new SqlCommand("sp_editarCliente", conexion);
-                    cmd.Parameters.AddWithValue("IDCliente", objeto.IDCliente ==  0 ? DBNull.Value : objeto.IDCliente);
+                    cmd.Parameters.AddWithValue("IDCliente", objeto.IDCliente == 0 ? DBNull.Value : objeto.IDCliente);
                     cmd.Parameters.AddWithValue("nombre", objeto.nombre is null ? DBNull.Value : objeto.nombre);
                     cmd.Parameters.AddWithValue("imagen", objeto.imagen is null ? DBNull.Value : objeto.imagen);
                     cmd.Parameters.AddWithValue("apellido", objeto.apellido is null ? DBNull.Value : objeto.apellido);
@@ -161,43 +180,57 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("direccion", objeto.direccion is null ? DBNull.Value : objeto.direccion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "El usuario ha sido correctamente editado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "El usuario ha sido correctamente editado"});
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                }
+                finally
+                {
+                    conexion.Close();
+
+                }
             }
         }
         [HttpDelete]
         [Route("EliminarCliente/{IDCliente:int}")]
         public IActionResult Eliminar(int IDCliente )
         {
-            try
+
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+
                     conexion.Open();
                     var cmd = new SqlCommand("sp_eliminarCliente", conexion);
                     cmd.Parameters.AddWithValue("IDCliente", IDCliente);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
         }
 
-       
 
-        }
 
     }
+
+
+}
 
