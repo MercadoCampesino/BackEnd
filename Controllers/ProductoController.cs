@@ -1,4 +1,5 @@
-﻿using MercadoCampesinoBack.Models;
+﻿using MC_BackEnd.Models;
+using MercadoCampesinoBack.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
@@ -124,7 +125,7 @@ namespace MercadoCampesinoBack.Controllers
         }
         [HttpPut]
         [Route("EditarProducto")]
-        public IActionResult Editar([FromBody] Producto objeto)
+        public IActionResult Editar([FromBody] Producto1 objeto)
         {
             var conexion = new SqlConnection(cadenaSQL);
             conexion.Open();
