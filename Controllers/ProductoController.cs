@@ -65,10 +65,11 @@ namespace MercadoCampesinoBack.Controllers
         {
             List<Producto> lista = new List<Producto>();
             Producto producto = new Producto();
+            using (var conexion = new SqlConnection(cadenaSQL))
+                {
             try
             {
-                using (var conexion = new SqlConnection(cadenaSQL))
-                {
+                
                     conexion.Open();
                     var cmd = new SqlCommand("sp_listarProductos", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -88,7 +89,7 @@ namespace MercadoCampesinoBack.Controllers
                             });
                         }
                     }
-                }
+                
                 producto = lista.Where(item => item.IDProducto == idProducto).FirstOrDefault();
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = producto });
             }
@@ -96,6 +97,11 @@ namespace MercadoCampesinoBack.Controllers
             {
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = producto });
+            }
+            finally
+            {
+                conexion.Close();
+            }
             }
         }
         [HttpPost]
@@ -156,16 +162,15 @@ namespace MercadoCampesinoBack.Controllers
         [Route("EliminarProducto/{IDProducto:int}")]
         public IActionResult Eliminar(int IDProducto)
         {
-            try
-            {
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+            try
+            {
                     conexion.Open();
                     var cmd = new SqlCommand("sp_eliminarProducto", conexion);
                     cmd.Parameters.AddWithValue("IDProducto", IDProducto);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
-                }
                 //Retornamos Status200OK si la conexion funciona correctamente
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
             }
@@ -174,6 +179,11 @@ namespace MercadoCampesinoBack.Controllers
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
+            finally
+            {
+                conexion.Close();
+            }
+                }
         }
     }
 }
