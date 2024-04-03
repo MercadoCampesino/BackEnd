@@ -21,6 +21,7 @@ namespace BaackMercadoCampesino.Controllers
         public IActionResult Lista()
         {
             List<Tienda> lista = new List<Tienda>();
+
             try
             {
                 using (var conexion = new SqlConnection(cadenaSQL))
@@ -45,9 +46,9 @@ namespace BaackMercadoCampesino.Controllers
                             });
                         }
                     }
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
             }
             catch (Exception error)
             {
@@ -59,10 +60,11 @@ namespace BaackMercadoCampesino.Controllers
         [Route("ObtenerTienda/{IDTienda:int}")]
         public IActionResult Obtener(int IDTienda)
         {
-            List<Tienda> lista = new List<Tienda>();
-            Tienda cliente = new Tienda();
-            try
-            {
+            
+                List<Tienda> lista = new List<Tienda>();
+                Tienda cliente = new Tienda();
+                try
+                {
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
                     conexion.Open();
@@ -86,19 +88,21 @@ namespace BaackMercadoCampesino.Controllers
                         }
                     }
                 }
-                cliente = lista.Where(item => item.IDTienda == IDTienda).FirstOrDefault();
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = cliente });
-            }
-            catch (Exception error)
-            {
-                //retornamos Status500InternalServerError si la conexion no es correcta y mandamos el mensaje de error 
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = cliente });
-            }
+
+                    cliente = lista.Where(item => item.IDTienda == IDTienda).FirstOrDefault();
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = cliente });
+                }
+                catch (Exception error)
+                {
+                    //retornamos Status500InternalServerError si la conexion no es correcta y mandamos el mensaje de error 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = cliente });
+                }
         }
         [HttpPost]
         [Route("GuardarTienda")]
         public IActionResult Guardar([FromBody] Tienda objeto)
         {
+
             try
             {
                 using (var conexion = new SqlConnection(cadenaSQL))
@@ -115,20 +119,22 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("FK_IDAdministrador", objeto.FK_IDAdministrador);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
             }
             catch (Exception error)
             {
                 //retornamos Status500InternalServerError si la conexion no es correcta y mandamos el mensaje de error 
                 return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
+            
         }
         [HttpPut]
         [Route("EditarTienda")]
         public IActionResult Editar([FromBody] Tienda objeto)
         {
+
             try
             {
                 using (var conexion = new SqlConnection(cadenaSQL))
@@ -144,9 +150,9 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("contrasenia", objeto.contrasenia is null ? DBNull.Value : objeto.contrasenia);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
             }
             catch (Exception error)
             {
@@ -158,6 +164,7 @@ namespace BaackMercadoCampesino.Controllers
         [Route("EliminarTienda/{IDTienda:int}")]
         public IActionResult Eliminar(int IDTienda)
         {
+
             try
             {
                 using (var conexion = new SqlConnection(cadenaSQL))
@@ -167,9 +174,9 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("IDTienda", IDTienda);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
             }
             catch (Exception error)
             {

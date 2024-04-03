@@ -122,11 +122,11 @@ namespace BaackMercadoCampesino.Controllers
         public IActionResult Guardar([FromBody] Cliente objeto)
         {
             string contraseniaHash = objeto.contrasenia;//BCrypt.Net.BCrypt.HashPassword(objeto.contrasenia);
-            using (var conexion = new SqlConnection(cadenaSQL))
-            {
-                try
-                {
 
+            try
+            {
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
                     conexion.Open();
                     objeto.contrasenia = contraseniaHash;
                     var cmd = new SqlCommand("sp_agregarCliente", conexion);
@@ -142,19 +142,17 @@ namespace BaackMercadoCampesino.Controllers
                     cmd.Parameters.AddWithValue("FK_IDAdministrador", objeto.FK_IDAdministrador = 1094880982);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+
                     //Retornamos Status200OK si la conexion funciona correctamente
                     return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
                 }
-                catch (Exception error)
-                {
-                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
-                }
-                finally
-                {
-                    conexion.Close();
-                }
             }
+            catch (Exception error)
+            {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+            }
+
         }
         [HttpPut]
         [Route("EditarCliente")]
@@ -201,11 +199,11 @@ namespace BaackMercadoCampesino.Controllers
         public IActionResult Eliminar(int IDCliente )
         {
 
-            using (var conexion = new SqlConnection(cadenaSQL))
-            {
-                try
-                {
 
+            try
+            {
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
                     conexion.Open();
                     var cmd = new SqlCommand("sp_eliminarCliente", conexion);
                     cmd.Parameters.AddWithValue("IDCliente", IDCliente);
@@ -215,15 +213,11 @@ namespace BaackMercadoCampesino.Controllers
                     //Retornamos Status200OK si la conexion funciona correctamente
                     return StatusCode(StatusCodes.Status200OK, new { mensaje = "eliminado" });
                 }
-                catch (Exception error)
-                {
-                    //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
-                    return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
-                }
-                finally
-                {
-                    conexion.Close();
-                }
+            }
+            catch (Exception error)
+            {
+                //retornamos Status500InternalServerError si la conexion no es correcta y mandaamos el mensaje de error 
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
             }
         }
 

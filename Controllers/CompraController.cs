@@ -23,6 +23,7 @@ namespace MC_BackEnd.Controllers
         [Route("GuardarCompra")]
         public IActionResult Guardar([FromBody] Compra objeto)
         {
+
             try
             {
                 //usamos una nueva conexion de la base de datos 
@@ -36,9 +37,9 @@ namespace MC_BackEnd.Controllers
                     cmd.Parameters.AddWithValue("FK_IDCliente", objeto.FK_IDCliente);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
+                    //Retornamos Status200OK si la conexion funciona correctamente
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
                 }
-                //Retornamos Status200OK si la conexion funciona correctamente
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "agregado" });
             }
             catch (Exception error)
             {
@@ -49,14 +50,15 @@ namespace MC_BackEnd.Controllers
         [Route("ObtenerCompra/{FK_IDCliente:int}/{FK_IDProducto:int}")]
         public IActionResult ObtenerCompra(int FK_IDCliente, int FK_IDProducto)
         {
+
             try
             {
-                Cliente cliente = null;
-                Producto producto = null;
-                Compra compra = null;
-
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    Cliente cliente = null;
+                    Producto producto = null;
+                    Compra compra = null;
+
                     conexion.Open();
 
                     // Obtener información del cliente
@@ -120,12 +122,12 @@ namespace MC_BackEnd.Controllers
                             }
                         }
                     }
-                }
 
-                if (cliente != null && producto != null && compra != null)
-                    return Ok(new { mensaje = "ok", Cliente = cliente, Tienda = producto, Compra = compra });
-                else
-                    return NotFound();
+                    if (cliente != null && producto != null && compra != null)
+                        return Ok(new { mensaje = "ok", Cliente = cliente, Tienda = producto, Compra = compra });
+                    else
+                        return NotFound();
+                }
             }
             catch (Exception error)
             {
@@ -136,14 +138,15 @@ namespace MC_BackEnd.Controllers
         [Route("ListarCompra")]
         public IActionResult ListarCompra()
         {
+
+
             try
             {
-                Cliente cliente = null;
-                Producto producto = null;
-                List<Compra> compras = new List<Compra>(); // Lista de compras
-
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    Cliente cliente = null;
+                    Producto producto = null;
+                    List<Compra> compras = new List<Compra>(); // Lista de compras
                     conexion.Open();
 
                     // Obtener información del cliente
@@ -201,13 +204,15 @@ namespace MC_BackEnd.Controllers
                             compras.Add(compraActual); // Agregar la compra actual a la lista de compras
                         }
                     }
-                }
 
-                // Verificar si se encontraron cliente, producto y compras
-                if (cliente != null && producto != null && compras.Count > 0)
-                    return Ok(new { mensaje = "ok", Cliente = cliente, Producto = producto, Compras = compras });
-                else
-                    return NotFound();
+
+
+                    // Verificar si se encontraron cliente, producto y compras
+                    if (cliente != null && producto != null && compras.Count > 0)
+                        return Ok(new { mensaje = "ok", Cliente = cliente, Producto = producto, Compras = compras });
+                    else
+                        return NotFound();
+                }
             }
             catch (Exception error)
             {
@@ -231,11 +236,12 @@ namespace MC_BackEnd.Controllers
              */
 
             string q= "sp_ListarProductosComprados";
-            try
+            using (var conexion = new SqlConnection(cadenaSQL))
             {
-                List<Producto> productos = new List<Producto>();
-                using (var conexion = new SqlConnection(cadenaSQL))
+                try
                 {
+                    List<Producto> productos = new List<Producto>();
+
                     conexion.Open();
                     SqlCommand cmd = new(q, conexion)
                     {
@@ -258,12 +264,17 @@ namespace MC_BackEnd.Controllers
                             productos.Add(producto);
                         }
                     }
+
+                    return Ok(new { mensaje = "ok", Productos = productos });
                 }
-                return Ok(new { mensaje = "ok", Productos = productos });
-            }
-            catch (Exception error)
-            {
-                return StatusCode(500, new { mensaje = error.Message });
+                catch (Exception error)
+                {
+                    return StatusCode(500, new { mensaje = error.Message });
+                }
+                finally
+                {
+                    conexion.Close();
+                }
             }
 
         }
