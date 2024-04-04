@@ -130,7 +130,6 @@ namespace MercadoCampesinoBack.Controllers
             conexion.Open();
             try
             {
-                conexion.Open();
                 var cmd = new SqlCommand("sp_editarProducto1", conexion);
                 cmd.Parameters.AddWithValue("IDProducto", objeto.IDProducto == 0 ? DBNull.Value : objeto.IDProducto);
                 cmd.Parameters.AddWithValue("existencia", objeto.existencia == 0 ? DBNull.Value : objeto.existencia);
